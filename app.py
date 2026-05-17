@@ -1,0 +1,1 @@
+# app.py - It is the point where uses will interact with the components of the application without actually seeing the internal working of the application. 

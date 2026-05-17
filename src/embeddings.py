@@ -1,0 +1,1 @@
+# These embeddings are created for the data as machine can only understand numbers

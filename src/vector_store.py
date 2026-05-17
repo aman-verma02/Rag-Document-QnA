@@ -1,0 +1,1 @@
+# Its a database where we will store the vectorized data and will use it for the retrieval of relevant data when a query is made.
