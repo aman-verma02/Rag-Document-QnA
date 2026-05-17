@@ -1,0 +1,7 @@
+pymupdf
+torch
+sentence-transformers
+faiss-cpu
+groq
+streamlit
+python-dotenv
