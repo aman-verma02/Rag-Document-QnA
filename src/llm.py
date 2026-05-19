@@ -77,5 +77,6 @@ class LLMClient:
             return answer
         
         except Exception as e:
-            logger.error(f"Error in generating answer from LLM: {e}")
-            raise LLMError(f"Error in generating answer from LLM: {e}")
+            if "rate_limit" in str(e).lower() or "429" in str(e):
+                raise LLMError("API rate limit exceeded. Please wait a moment and try again.")
+            raise LLMError(f"Error generating answer: {e}")

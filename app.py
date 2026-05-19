@@ -64,16 +64,19 @@ if uploaded_file is not None:
 if  st.session_state.pdf_ingested:
     question = st.text_input("Enter your question:")           # question input
     if st.button("Submit"):               # submit button
-        with st.spinner("Processing..."):              # loading indicator
-            try:
-                answer = st.session_state.pipeline.query(question)  # Query the pipeline with the user's question
-                st.markdown("### 💡 Answer")
-                st.markdown(answer)
-                logger.info(f"Answer generated successfully: {answer}")
-                st.success("Answer generated successfully!")  # green success message
-            except Exception as e:
-                logger.error(f"Error in processing question: {e}")
-                st.error(f"Error in processing question: {e}")  # Display error message to the user
+        if not question.strip():
+            st.warning("Please enter a valid question.")  # warning message for empty question
+        else:
+            with st.spinner("Processing..."):              # loading indicator
+                try:
+                    answer = st.session_state.pipeline.query(question)  # Query the pipeline with the user's question
+                    st.markdown("### 💡 Answer")
+                    st.markdown(answer)
+                    logger.info(f"Answer generated successfully: {answer}")
+                    st.success("Answer generated successfully!")  # green success message
+                except Exception as e:
+                    logger.error(f"Error in processing question: {e}")
+                    st.error(f"Error in processing question: {e}")  # Display error message to the user
     else: 
         st.info("Please enter a question and click Submit to get an answer.")  # info message when submit button is not clicked
 else:

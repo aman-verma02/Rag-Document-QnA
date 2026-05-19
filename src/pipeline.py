@@ -43,6 +43,11 @@ class RAGPipeline:
             # Step 3: Chunk the cleaned text into smaller pieces
             chunks = self.pdf_processor.process(file_path)
             
+            if not chunks:
+                raise PipelineError("PDF appears to be empty or contains no extractable text.")
+            
+            if len(chunks) > 500:
+                raise PipelineError("PDF is too large. Please upload a document with fewer than 500 pages.")
             
             # Step 4: Generate embeddings for each chunk
             embeddings = self.embedding_generator.generate_batch(chunks)
