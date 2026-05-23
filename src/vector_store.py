@@ -3,9 +3,12 @@
 
 
 import faiss
-from .exceptions import EmbeddingError, VectorStoreError
 from logging import getLogger
 import numpy as np 
+from exception.exception import RagSystemException
+import sys
+from logging.logger import logging
+
 logger = getLogger(__name__)
 
 
@@ -20,9 +23,9 @@ class VectorStore:
         try: 
             self.faiss_index = faiss.IndexFlatL2(dimensions)  # Assuming 384-dimensional embeddings
             self.chunk_storage = []  # A list to store the corresponding text chunks
-            logger.info("Vector store initialized successfully.")
+            logging.info("Vector store initialized successfully.")
         except Exception as e:
-            raise VectorStoreError(f"Error in initializing vector store: {e}")
+            raise RagSystemException(f"Error in initializing vector store: {e}", sys)
         
     def _to_numpy(self, tensor):
         try: 
@@ -30,8 +33,8 @@ class VectorStore:
                 return tensor.cpu().numpy()
             return np.array(tensor)
         except Exception as e:
-            logger.error(f"Error in converting tensor to numpy array: {e}")
-            raise VectorStoreError(f"Error in converting tensor to numpy array: {e}")
+            logging.error(f"Error in converting tensor to numpy array: {e}")
+            raise RagSystemException(f"Error in converting tensor to numpy array: {e}", sys)
         
     
     def add_chunks(self, chunks, embeddings):
@@ -44,9 +47,9 @@ class VectorStore:
         try: 
             self.chunk_storage.extend(chunks) # Add chunks to the chunk storage
             self.faiss_index.add(self._to_numpy(embeddings)) # Add embeddings to the FAISS index
-            logger.info("Chunks added to vector store successfully.")
+            logging.info("Chunks added to vector store successfully.")
         except Exception as e:
-            raise VectorStoreError(f"Error in adding chunks to vector store: {e}")
+            raise RagSystemException(f"Error in adding chunks to vector store: {e}", sys)
 
 
 
@@ -65,11 +68,11 @@ class VectorStore:
             # Reshape the query vector for FAISS as it expects a 2D array so we reshape it to have one row and as many columns as the dimensions of the embedding.
             distances, indices = self.faiss_index.search(query_vector, k)
             # k = number of results you want
-            logger.info(f"Search results - Distances: {distances}, Indices: {indices}")
+            logging.info(f"Search results - Distances: {distances}, Indices: {indices}")
             return [self.chunk_storage[i] for i in indices[0]]
         except Exception as e:
-            raise VectorStoreError(f"Error in searching vector store: {e}")
-        
+            raise RagSystemException(f"Error in searching vector store: {e}", sys)
+
 
 
     def get_chunks(self, indices): 
@@ -83,4 +86,4 @@ class VectorStore:
         try: 
             return [self.chunk_storage[i] for i in indices]
         except Exception as e:
-            raise VectorStoreError(f"Error in retrieving chunks from vector store: {e}")
+            raise RagSystemException(f"Error in retrieving chunks from vector store: {e}", sys)

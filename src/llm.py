@@ -8,8 +8,10 @@ from .exceptions import LLMError
 from dotenv import load_dotenv
 import os
 from groq import Groq
-from logging import getLogger
-logger = getLogger(__name__)
+from logging.logger import logging
+import sys
+from exception.exception import RagSystemException
+
 load_dotenv()
 
 
@@ -26,11 +28,11 @@ class LLMClient:
             if not api_key:
                 api_key = GROQ_API_KEY
             self.groq_client = Groq(api_key=api_key)
-            logger.info("LLM client initialized successfully.")
+            logging.info("LLM client initialized successfully.")
 
         except Exception as e:
-            logger.error(f"Error in initializing LLM client: {e}")
-            raise LLMError(f"Error in initializing LLM client: {e}")
+            logging.error(f"Error in initializing LLM client: {e}")
+            raise RagSystemException(f"Error in initializing LLM client: {e}", sys)
     
 
     def build_prompt(self, question, chunks): 
@@ -46,14 +48,14 @@ class LLMClient:
             system_prompt = "You are a helpful research assistant. Answer the user's question based ONLY on the provided context.If the answer cannot be found in the context, say 'I cannot find the answer in the provided document.'Be concise, accurate and directly answer the question."
 
             user_prompt = f"Question: {question}\n\nContext:\n" + "\n\n".join(chunks)
-            logger.info("Prompt built successfully for LLM.")
+            logging.info("Prompt built successfully for LLM.")
             return system_prompt , user_prompt
         
         except Exception as e:
-            logger.error(f"Error in building prompt for LLM: {e}")
-            raise LLMError(f"Error in building prompt for LLM: {e}")
-        
-        
+            logging.error(f"Error in building prompt for LLM: {e}")
+            raise RagSystemException(f"Error in building prompt for LLM: {e}", sys)
+
+
     def generate_answer(self, question, chunks):
         """
         Generates an answer from the LLM based on the provided prompt.
@@ -73,10 +75,10 @@ class LLMClient:
                 ]
             )
             answer = response.choices[0].message.content
-            logger.info("Answer generated successfully from LLM.")
+            logging.info("Answer generated successfully from LLM.")
             return answer
         
         except Exception as e:
             if "rate_limit" in str(e).lower() or "429" in str(e):
-                raise LLMError("API rate limit exceeded. Please wait a moment and try again.")
-            raise LLMError(f"Error generating answer: {e}")
+                raise RagSystemException("API rate limit exceeded. Please wait a moment and try again.", sys)
+            raise RagSystemException(f"Error generating answer: {e}", sys)

@@ -2,7 +2,7 @@ import sys
 from logging.logger import logging
 
 
-class NetworkSecurityException(Exception):
+class RagSystemException(Exception):
     def __init__(self, error_message, error_details: sys): 
         """
         error_message: str  

@@ -2,9 +2,9 @@
 
 
 from sentence_transformers import SentenceTransformer
-from logging import getLogger
-from .exceptions import EmbeddingError
-logger = getLogger(__name__)
+from logging.logger import logging
+from exception.exception import RagSystemException
+import sys
 
 
 class EmbeddingGenerator: 
@@ -16,10 +16,10 @@ class EmbeddingGenerator:
         """
         try: 
             self.model = SentenceTransformer(model_name)
-            logger.info(f"Embedding model initialized: {model_name}")
+            logging.info(f"Embedding model initialized: {model_name}")
         except Exception as e:
-            logger.error(f"Error in initializing embedding model: {e}")
-            raise EmbeddingError(f"Error in initializing embedding model: {e}")
+            logging.error(f"Error in initializing embedding model: {e}")
+            raise RagSystemException(f"Error in initializing embedding model: {e}", sys)
 
     def generate(self, text: str):
         """
@@ -31,11 +31,11 @@ class EmbeddingGenerator:
         """
         try:
             embedding = self.model.encode(text, convert_to_tensor=True)
-            logger.info("Embedding generated successfully.")
+            logging.info("Embedding generated successfully.")
             return embedding
         except Exception as e:
-            logger.error(f"Error in generating embedding: {e}")
-            raise EmbeddingError(f"Error in generating embedding: {e}")
+            logging.error(f"Error in generating embedding: {e}")
+            raise RagSystemException(f"Error in generating embedding: {e}", sys)
 
 
      # Why batch processing ?   : When you call encode() on a list of texts all at once, the model processes them in parallel using matrix operations. This is how GPUs and even optimized CPUs work — they're built for parallel math.
@@ -50,8 +50,8 @@ class EmbeddingGenerator:
         """
         try:
             embeddings = self.model.encode(texts, convert_to_tensor=True)
-            logger.info("Batch embeddings generated successfully.")
+            logging.info("Batch embeddings generated successfully.")
             return embeddings
         except Exception as e:
-            logger.error(f"Error in generating batch embeddings: {e}")
-            raise EmbeddingError(f"Error in generating batch embeddings: {e}")
+            logging.error(f"Error in generating batch embeddings: {e}")
+            raise RagSystemException(f"Error in generating batch embeddings: {e}", sys)

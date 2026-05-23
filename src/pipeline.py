@@ -1,15 +1,16 @@
 # This is the pipline that will process the PDF file, generate embeddings and store them in the vector store. It will also handle the retrieval of relevant chunks based on the query and pass them to the LLM for generating the answer.z
 
 
+
+
 from .pdf_processor import PDFProcessor
 from .embeddings import EmbeddingGenerator
 from .vector_store import VectorStore
 from .llm import LLMClient
 from .exceptions import PDFProcessingError, EmbeddingError, VectorStoreError, LLMError
-from logging import getLogger
-from .exceptions import PipelineError
-logger = getLogger(__name__)
-
+from logging.logger import logging
+from exception.exception import RagSystemException
+import sys
 
 
 class RAGPipeline:
@@ -24,11 +25,11 @@ class RAGPipeline:
             self.embedding_generator = EmbeddingGenerator()
             self.vector_store = VectorStore(dimensions=384)  # Assuming 384-dimensional embeddings for 'all-MiniLM-L6-v2'
             self.llm_client = LLMClient(api_key = None)  # Initialize LLMClient with necessary configuration (e.g., API key)
-            logger.info("RAG pipeline initialized successfully.")
+            logging.info("RAG pipeline initialized successfully.")
 
         except Exception as e:
-            logger.error(f"Error in initializing RAG pipeline: {e}")
-            raise PipelineError(f"Error in initializing RAG pipeline: {e}")
+            logging.error(f"Error in initializing RAG pipeline: {e}")
+            raise RagSystemException(f"Error in initializing RAG pipeline: {e}", sys)
         
 
     def ingest(self, file_path: str): 
@@ -44,10 +45,10 @@ class RAGPipeline:
             chunks = self.pdf_processor.process(file_path)
             
             if not chunks:
-                raise PipelineError("PDF appears to be empty or contains no extractable text.")
+                raise RagSystemException("PDF appears to be empty or contains no extractable text.", sys)
             
             if len(chunks) > 500:
-                raise PipelineError("PDF is too large. Please upload a document with fewer than 500 pages.")
+                raise RagSystemException("PDF is too large. Please upload a document with fewer than 500 pages.", sys)
             
             # Step 4: Generate embeddings for each chunk
             embeddings = self.embedding_generator.generate_batch(chunks)
@@ -55,12 +56,11 @@ class RAGPipeline:
             # Step 5: Store the chunks and their corresponding embeddings in the vector store
             self.vector_store.add_chunks(chunks, embeddings)
             
-            logger.info(f"PDF file ingested successfully: {file_path}")
+            logging.info(f"PDF file ingested successfully: {file_path}")
 
         except (PDFProcessingError, EmbeddingError, VectorStoreError) as e:
-            logger.error(f"Error in ingesting PDF file: {e}")
-            raise PipelineError(f"Error in ingesting PDF file: {e}")
-            
+            logging.error(f"Error in ingesting PDF file: {e}")
+            raise RagSystemException(f"Error in ingesting PDF file: {e}", sys)
 
     def query(self, question: str):
         """
@@ -83,7 +83,7 @@ class RAGPipeline:
             return answer
             
         except (EmbeddingError, VectorStoreError, LLMError) as e:
-            logger.error(f"Error in processing query: {e}")
-            raise PipelineError(f"Error in processing query: {e}")
+            logging.error(f"Error in processing query: {e}")
+            raise RagSystemException(f"Error in processing query: {e}", sys)
 
 
