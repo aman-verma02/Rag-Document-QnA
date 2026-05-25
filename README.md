@@ -5,7 +5,7 @@ An end-to-end RAG system that allows users to upload any PDF document and ask na
 ---
 
 ## 🔴 Live Demo
-👉 [Click here to open the live app]()
+👉 [Click here to open the live app](https://huggingface.co/spaces/jack-ai02/rag-document-qna)
 
 
 ## Problem Statement 
